@@ -1,0 +1,61 @@
+Sub BOA()
+    Account_Number = "389418366019"
+    Header_Record_Indicator = "H"
+     Filler = Space(22)
+    sendDate = Replace(Format(Now(), "YYYYMMDD"), "-", "")
+    Filler1 = Space(273)
+    Header = Account_Number & Header_Record_Indicator & Filler & sendDate & Filler1 & vbCr
+     
+    Detail_Record_Row = ""
+    Record_Type_Code = "O"
+    Check_Number = ""
+    Amount = ""
+    Filler3 = Space(1)
+    Payee_Name = Space(256)
+    Filler4 = Space(16)
+     
+    Trailer_Record_Indicator = "T"
+    Item_Count_Total = String(10, "0")
+    Dollar_Amount_Total = String(12, "0")
+    Filler2 = Space(281)
+    Trailer = Account_Number & Trailer_Record_Indicator & Item_Count_Total & _
+     Dollar_Amount_Total & Filler2 & vbCr
+    
+    'col,row 1 based 1st row is column headings so we start on row 2
+    itemCount = -1
+    Row_Count = -1
+    'get entry count
+    For i = 2 To 500
+        CellValue = Parent.Workbooks(1).Worksheets(1).Cells(i, 17).Value
+        If CellValue <> "" Then
+            Row_Count = Row_Count + 1
+        End If
+        If CellValue = "APCHK" Then
+            itemCount = itemCount + 1
+        End If
+    Next
+    
+    Item_Count_Total = Left(Item_Count_Total, Len(Item_Count_Total) - Len(itemCount)) & itemCount
+     'build the rows
+    For i = 2 To Row_Count + 1
+        CellValue = Parent.Workbooks(1).Worksheets(1).Cells(i, 17).Value
+        If CellValue = "APCHK" Then
+            CellValue = Parent.Workbooks(1).Worksheets(1).Cells(i, 6).Value
+            Check_Number = String(10 - Len(CellValue), "0") & CellValue
+             CellValue = Replace(Replace(Parent.Workbooks(1).Worksheets(1).Cells(i, 5).Text, ".", ""), ",", "")
+            Amount = String(10 - Len(CellValue), "0") & CellValue
+             CellValue = Parent.Workbooks(1).Worksheets(1).Cells(i, 2).Text
+            Payee_Name = Space(256 - Len(CellValue)) & CellValue
+            Detail_Record_Row = Detail_Record_Row & Account_Number & Record_Type_Code & Check_Number & _
+             Amount & sendDate & Filler3 & Payee_Name & Filler4 & vbCr
+        End If
+    Next
+    
+    f = Header & Detail_Record_Row & Trailer
+    TransmitFile = "C:\BOA\CS_CHECK_TRANSMIT_" & Replace(Format(Now(), "YYYYMMDD"), "-", "") & ".txt"
+     fnum = FreeFile()
+    Open TransmitFile For Output As fnum
+    Print #fnum, f
+    Close #fnum
+    
+End Sub
