@@ -45,7 +45,7 @@ Sub BOA()
              CellValue = Replace(Replace(Parent.Workbooks(1).Worksheets(1).Cells(i, 5).Text, ".", ""), ",", "")
             Amount = String(10 - Len(CellValue), "0") & CellValue
              CellValue = Parent.Workbooks(1).Worksheets(1).Cells(i, 2).Text
-            Payee_Name = Space(256 - Len(CellValue)) & CellValue
+            Payee_Name =  CellValue & Space(256 - Len(CellValue))
             Detail_Record_Row = Detail_Record_Row & Account_Number & Record_Type_Code & Check_Number & _
              Amount & sendDate & Filler3 & Payee_Name & Filler4 & vbCr
         End If
